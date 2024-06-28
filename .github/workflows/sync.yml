@@ -25,10 +25,14 @@ jobs:
       run: git remote add upstream https://github.com/Paroxity/portal.git
 
     - name: Fetch Upstream
-      run: git fetch upstream
+      run: git fetch upstream master
 
     - name: Merge Upstream Changes
       run: |
-        git checkout main
-        git merge upstream/main
-        git push origin main
+        git checkout master
+        git merge upstream/master --strategy-option theirs --no-commit
+        git restore --source=HEAD --staged README.md
+        git commit -m "Merge upstream changes"
+
+    - name: Push Changes
+      run: git push origin master
