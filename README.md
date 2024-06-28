@@ -1,6 +1,7 @@
 ![Banner](https://raw.githubusercontent.com/Paroxity/portal/master/banner.png)
 
 A lightweight transfer proxy written in Go for Minecraft: Bedrock Edition.
+### Note: PixelRidge only live builds the binary for Ubuntu 22.04 for one of it's projects. We have not made and will not make any modifications to this code other than to keep it updated with the upstream
 
 # Installation
 
