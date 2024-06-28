@@ -1,30 +1,32 @@
 name: Build Portal
+
 on:
-  release:
-    types:
-      - created
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
   build:
-    name: Build ${{ matrix.os }}-${{ matrix.arch }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [ "linux", "darwin", "windows" ]
-        arch: [ "amd64", "arm64" ]
+    runs-on: ubuntu-22.04
+
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Setup Golang
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.18
-      - name: Get dependencies
-        run: |
-          mkdir -p $GOPATH/bin
-          export PATH=$PATH:$GOPATH/bin
-      - name: Build Executable
-        run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o portal_${{ matrix.os }}_${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }} -ldflags="-s -w" -v examples/main.go
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: portal_${{ matrix.os }}_${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.22
+
+    - name: Install dependencies
+      run: go mod tidy
+
+    - name: Build binary
+      run: go build -o portal ./examples/main.go
+
+    - name: Archive binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: portal
+        path: portal
