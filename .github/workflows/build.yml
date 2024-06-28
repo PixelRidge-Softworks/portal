@@ -78,6 +78,7 @@ jobs:
         gh release create ${{ env.tag }} portal --title "Release ${{ env.tag }}" --notes "Automated release of version ${{ env.tag }}" --latest
 
     - name: Update latest tag
+      if: env.release_exists == 'false'
       env:
         GH_TOKEN: ${{ secrets.GH_PAT }}
       run: |
