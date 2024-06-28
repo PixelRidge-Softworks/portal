@@ -32,7 +32,11 @@ jobs:
         git checkout master
         git merge upstream/master --strategy-option theirs --no-commit
         git restore --source=HEAD --staged README.md .github/
-        git commit -m "Merge upstream changes"
+        if git diff-index --quiet HEAD; then
+          echo "No changes to commit"
+        else
+          git commit -m "Merge upstream changes"
+        fi
 
     - name: Push Changes
       run: git push origin master
