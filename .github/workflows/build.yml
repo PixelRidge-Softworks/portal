@@ -1,10 +1,12 @@
-name: Build Portal
+name: Build and Release Portal
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
   workflow_dispatch:
 
 jobs:
@@ -31,3 +33,42 @@ jobs:
       with:
         name: portal
         path: portal
+
+  release:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install GitHub CLI
+      run: |
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+        sudo apt-add-repository https://cli.github.com/packages
+        sudo apt update
+        sudo apt install gh
+
+    - name: Get latest upstream release
+      id: get_release
+      run: |
+        LATEST_TAG=$(curl -s https://api.github.com/repos/Paroxity/portal/releases/latest | jq -r .tag_name)
+        echo "::set-output name=tag::$LATEST_TAG"
+
+    - name: Download binary artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: portal
+        path: .
+
+    - name: Create GitHub release
+      env:
+        GH_TOKEN: ${{ secrets.GH_PAT }}
+      run: |
+        gh release create ${{ steps.get_release.outputs.tag }} portal --title "Release ${{ steps.get_release.outputs.tag }}" --notes "Automated release of version ${{ steps.get_release.outputs.tag }}" --latest
+
+    - name: Update latest tag
+      env:
+        GH_TOKEN: ${{ secrets.GH_PAT }}
+      run: |
+        gh release delete latest -y
+        gh release create latest portal --title "Latest Release" --notes "Latest build from the main branch" --latest
