@@ -61,24 +61,21 @@ jobs:
         name: portal
         path: .
 
-    - name: Check if release exists
-      id: check_release
+    - name: Delete existing release
+      env:
+        GH_TOKEN: ${{ secrets.GH_PAT }}
       run: |
         if gh release view ${{ env.tag }} > /dev/null 2>&1; then
-          echo "release_exists=true" >> $GITHUB_ENV
-        else
-          echo "release_exists=false" >> $GITHUB_ENV
+          gh release delete ${{ env.tag }} -y
         fi
 
     - name: Create GitHub release
-      if: env.release_exists == 'false'
       env:
         GH_TOKEN: ${{ secrets.GH_PAT }}
       run: |
         gh release create ${{ env.tag }} portal --title "Release ${{ env.tag }}" --notes "Automated release of version ${{ env.tag }}" --latest
 
     - name: Update latest tag
-      if: env.release_exists == 'false'
       env:
         GH_TOKEN: ${{ secrets.GH_PAT }}
       run: |
