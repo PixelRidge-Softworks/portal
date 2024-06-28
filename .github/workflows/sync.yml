@@ -31,7 +31,7 @@ jobs:
       run: |
         git checkout master
         git merge upstream/master --strategy-option theirs --no-commit
-        git restore --source=HEAD --staged README.md
+        git restore --source=HEAD --staged README.md .github/
         git commit -m "Merge upstream changes"
 
     - name: Push Changes
