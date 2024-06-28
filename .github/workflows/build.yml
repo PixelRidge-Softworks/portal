@@ -15,10 +15,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
         go-version: 1.22
 
@@ -29,7 +29,7 @@ jobs:
       run: go build -o portal ./examples/main.go
 
     - name: Archive binary
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: portal
         path: portal
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Install GitHub CLI
       run: |
@@ -53,10 +53,10 @@ jobs:
       id: get_release
       run: |
         LATEST_TAG=$(curl -s https://api.github.com/repos/Paroxity/portal/releases/latest | jq -r .tag_name)
-        echo "::set-output name=tag::$LATEST_TAG"
+        echo "tag=$LATEST_TAG" >> $GITHUB_ENV
 
     - name: Download binary artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: portal
         path: .
@@ -65,7 +65,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GH_PAT }}
       run: |
-        gh release create ${{ steps.get_release.outputs.tag }} portal --title "Release ${{ steps.get_release.outputs.tag }}" --notes "Automated release of version ${{ steps.get_release.outputs.tag }}" --latest
+        gh release create ${{ env.tag }} portal --title "Release ${{ env.tag }}" --notes "Automated release of version ${{ env.tag }}" --latest
 
     - name: Update latest tag
       env:
